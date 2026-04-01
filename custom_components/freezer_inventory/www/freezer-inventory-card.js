@@ -49,6 +49,7 @@ class FreezerInventoryCard extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>
+        :host { display: block; }
         ha-card { overflow: hidden; }
         .header {
           padding: 16px 16px 0;
@@ -76,16 +77,18 @@ class FreezerInventoryCard extends HTMLElement {
         .tile:active { transform: scale(0.94); }
         .tile-icon { font-size: 1.5em; margin-bottom: 4px; }
         .tile-name {
-          font-size: 0.85em;
+          font-size: 1.2em;
           font-weight: 500;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          text-align: left;
         }
         .tile-label {
-          font-size: 0.75em;
+          font-size: 0.8em;
           color: var(--secondary-text-color);
           margin-top: 2px;
+          text-align: left;
         }
         .empty {
           text-align: center;
@@ -95,13 +98,11 @@ class FreezerInventoryCard extends HTMLElement {
         }
       </style>
       <ha-card>
-        ${title != null ? `<div class="header">${this._escapeHtml(title)}</div>` : ''}
         ${items.length
           ? `<div class="grid">${items.map((item, i) => `
               <div class="tile" data-i="${i}">
-                <div class="tile-icon">❄️</div>
                 <div class="tile-name">${this._escapeHtml(item.description)}</div>
-                <div class="tile-label">${item.portions} 🧊${item.expiration ? ' · ' + this._formatDate(item.expiration) : ''}</div>
+                <div class="tile-label">${item.portions} <ha-icon icon="mdi:food-takeout-box-outline"></ha-icon>${item.expiration ? ' · ' + this._formatDate(item.expiration) : ''}</div>
               </div>`).join('')}
             </div>`
           : '<div class="empty">Freezer is empty ❄️</div>'
@@ -119,10 +120,25 @@ class FreezerInventoryCard extends HTMLElement {
         }
       });
     });
+
+    // Notify HA that the card size may have changed
+    window.dispatchEvent(new Event('resize'));
   }
 
   getCardSize() {
-    return Math.max(2, Math.ceil(this._items.length / 3) + 1);
+    const rows = Math.max(1, Math.ceil(this._items.length / 3));
+    const titleRows = this._config?.title != null ? 1 : 0;
+    return rows * 2 + titleRows + 1;
+  }
+
+  getLayoutOptions() {
+    const tileRows = Math.max(1, Math.ceil(this._items.length / 3));
+    const rows = this._config?.rows ?? Math.ceil(tileRows * 1.34);
+    return {
+      grid_rows: rows,
+      grid_columns: 4,
+      grid_min_rows: rows,
+    };
   }
 
   static getStubConfig() {
