@@ -1,7 +1,7 @@
 {
   "domain": "freezer_inventory",
   "name": "Freezer Inventory",
-  "codeowners": [],
+  "codeowners": ["@gebirgsbaerbel"],
   "config_flow": true,
   "dependencies": ["todo"],
   "documentation": "https://github.com/gebirgsbaerbel/home-assistant-freezer-inventory",
