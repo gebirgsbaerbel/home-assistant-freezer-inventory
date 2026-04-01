@@ -1,0 +1,20 @@
+freezer_minus:
+  name: Freezer Minus
+  description: Decrements the portion count of a freezer item by one.
+  fields:
+    item:
+      name: Item
+      description: Name of the item (as shown in the freezer inventory).
+      required: true
+      example: Chicken
+      selector:
+        text:
+    portions:
+      name: Portions
+      description: Current portion count of the item.
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 0
+          max: 99
