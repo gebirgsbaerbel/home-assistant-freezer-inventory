@@ -45,99 +45,71 @@ class FreezerInventoryCard extends HTMLElement {
     if (!this._config) return;
 
     const items = this._items;
-    const c = this._config;
-    const cardBg      = c.card_background ?? '';
-    const rowBg     = c.row_color       ?? 'var(--secondary-background-color)';
-    const textColor = c.text_color      ?? 'var(--primary-text-color)';
-    const dateColor = c.secondary_color ?? 'var(--secondary-text-color)';
-    const circleColor = c.accent_color  ?? 'var(--primary-color)';
+    const title = this._config.title;
 
     this.shadowRoot.innerHTML = `
       <style>
         :host { display: block; }
-        ha-card { overflow: hidden; ${cardBg ? `background: ${cardBg};` : ''} }
+        ha-card { overflow: hidden; }
         .header {
-          padding: 16px 16px 8px;
+          padding: 16px 16px 0;
           font-size: var(--ha-card-header-font-size, 1.1em);
           font-weight: 500;
-          color: ${textColor};
+          color: var(--ha-card-header-color, var(--primary-text-color));
         }
-        .list {
-          padding: 8px 12px 12px;
-          display: flex;
-          flex-direction: column;
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
           gap: 8px;
+          padding: 12px;
         }
-        .row {
-          display: flex;
-          align-items: center;
-          background: ${rowBg};
-          border-radius: 32px;
-          padding: 0px 10px;
+        .tile {
+          background: var(--secondary-background-color);
+          border-radius: 12px;
+          padding: 12px 8px;
+          text-align: center;
           cursor: pointer;
           user-select: none;
           transition: opacity 0.15s, transform 0.1s;
           -webkit-tap-highlight-color: transparent;
-          min-height: 58px;
         }
-        .row:hover { opacity: 0.8; }
-        .row:active { transform: scale(0.98); }
-        .count-circle {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: ${circleColor};
-          color: #ffffff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.1em;
-          font-weight: 600;
-          flex-shrink: 0;
-          margin-right: 14px;
-        }
-        .item-text {
-          flex-grow: 1;
-          overflow: hidden;
-        }
-        .item-name {
-          font-size: 1em;
-          font-weight: 700;
+        .tile:hover { opacity: 0.8; }
+        .tile:active { transform: scale(0.94); }
+        .tile-icon { font-size: 1.5em; margin-bottom: 4px; }
+        .tile-name {
+          font-size: 1.2em;
+          font-weight: 500;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          color: ${textColor};
+          text-align: left;
         }
-        .item-date {
-          font-size: 1em;
-          color: ${dateColor};
-          flex-shrink: 0;
-          margin-left: 10px;
-          margin-right: 10px;
+        .tile-label {
+          font-size: 0.8em;
+          color: var(--secondary-text-color);
+          margin-top: 2px;
+          text-align: left;
         }
         .empty {
           text-align: center;
-          color: ${dateColor};
+          color: var(--secondary-text-color);
           padding: 24px;
           font-size: 0.9em;
         }
       </style>
       <ha-card>
         ${items.length
-          ? `<div class="list">${items.map((item, i) => `
-              <div class="row" data-i="${i}">
-                <div class="count-circle">${item.portions}</div>
-                <div class="item-text">
-                  <div class="item-name">${this._escapeHtml(item.description)}</div>
-                </div>
-                ${item.expiration ? `<div class="item-date">${this._formatDate(item.expiration)}</div>` : ''}
+          ? `<div class="grid">${items.map((item, i) => `
+              <div class="tile" data-i="${i}">
+                <div class="tile-name">${this._escapeHtml(item.description)}</div>
+                <div class="tile-label">${item.portions} <ha-icon icon="mdi:food-takeout-box-outline"></ha-icon>${item.expiration ? ' · ' + this._formatDate(item.expiration) : ''}</div>
               </div>`).join('')}
             </div>`
           : '<div class="empty">Freezer is empty ❄️</div>'
         }
       </ha-card>`;
 
-    this.shadowRoot.querySelectorAll('.row').forEach(el => {
+    this.shadowRoot.querySelectorAll('.tile').forEach(el => {
       el.addEventListener('click', () => {
         const item = this._items[+el.dataset.i];
         if (item && this._hass) {
@@ -153,8 +125,15 @@ class FreezerInventoryCard extends HTMLElement {
     window.dispatchEvent(new Event('resize'));
   }
 
+  getCardSize() {
+    const rows = Math.max(1, Math.ceil(this._items.length / 3));
+    const titleRows = this._config?.title != null ? 1 : 0;
+    return rows * 2 + titleRows + 1;
+  }
+
   getLayoutOptions() {
-    const rows = this._config?.rows ?? Math.max(2, this._items.length + 1);
+    const tileRows = Math.max(1, Math.ceil(this._items.length / 3));
+    const rows = this._config?.rows ?? Math.ceil(tileRows * 1.34);
     return {
       grid_rows: rows,
       grid_columns: 4,
