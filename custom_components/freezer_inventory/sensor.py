@@ -129,4 +129,4 @@ class FreezerInventorySensor(SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        return {"items": self._items}
+        return {"items": self._items, "todo_entity_id": self._todo_entity_id}
