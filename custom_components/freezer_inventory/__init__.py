@@ -73,11 +73,11 @@ async def _async_ensure_lovelace_resource(hass: HomeAssistant) -> None:
         if not lovelace:
             _LOGGER.warning("Lovelace not available; add %s as a module resource manually.", _CARD_URL)
             return
-        resources = lovelace.get("resources")
+        resources = getattr(lovelace, "resources", None)
         if not resources:
             _LOGGER.warning("Lovelace resources unavailable; add %s as a module resource manually.", _CARD_URL)
             return
-        await resources.async_load(True)
+        await resources.async_load()
         if not any(r["url"] == _CARD_URL for r in resources.async_items()):
             await resources.async_create_item({"res_type": "module", "url": _CARD_URL})
             _LOGGER.info("Registered Lovelace resource: %s", _CARD_URL)
