@@ -2,97 +2,52 @@
 from __future__ import annotations
 
 import logging
-from datetime import timedelta
 
-import voluptuous as vol
-
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_START
 from homeassistant.core import Event, HomeAssistant, callback
-from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import (
     async_track_state_change_event,
     async_track_time_interval,
 )
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+
+from .const import (
+    CONF_TODO_ENTITY_ID,
+    DOMAIN,
+    EVENT_FREEZER_REFRESH,
+    SCAN_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-CONF_TODO_ENTITY_ID = "todo_entity_id"
-DEFAULT_TODO_ENTITY_ID = "todo.freezer"
-SCAN_INTERVAL = timedelta(minutes=10)
-EVENT_FREEZER_REFRESH = "freezer_refresh"
-SERVICE_FREEZER_MINUS = "freezer_minus"
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Optional(CONF_TODO_ENTITY_ID, default=DEFAULT_TODO_ENTITY_ID): cv.entity_id,
-    }
-)
-
-
-async def async_setup_platform(
+async def async_setup_entry(
     hass: HomeAssistant,
-    config: ConfigType,
+    entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
-    """Set up the Freezer Inventory sensor."""
-    todo_entity_id = config[CONF_TODO_ENTITY_ID]
+    """Set up Freezer Inventory sensor from a config entry."""
+    todo_entity_id = entry.data[CONF_TODO_ENTITY_ID]
     sensor = FreezerInventorySensor(hass, todo_entity_id)
+    hass.data[DOMAIN][entry.entry_id] = sensor
     async_add_entities([sensor])
-
-    async def handle_freezer_minus(call) -> None:
-        """Decrement portions for a named freezer item."""
-        item_name = call.data["item"]
-        portions = call.data["portions"]
-        new_portions = max(int(portions) - 1, 0)
-
-        uid = next(
-            (i["uid"] for i in sensor._items if i["description"] == item_name),
-            None,
-        )
-        if uid is None:
-            _LOGGER.error("freezer_minus: item '%s' not found in cached items", item_name)
-            return
-
-        await hass.services.async_call(
-            "todo",
-            "update_item",
-            {
-                "entity_id": todo_entity_id,
-                "item": uid,
-                "description": str(new_portions),
-            },
-            blocking=True,
-        )
-        hass.bus.async_fire(EVENT_FREEZER_REFRESH)
-
-    hass.services.async_register(
-        "freezer_inventory",
-        SERVICE_FREEZER_MINUS,
-        handle_freezer_minus,
-        schema=vol.Schema(
-            {
-                vol.Required("item"): cv.string,
-                vol.Required("portions"): vol.Coerce(int),
-            }
-        ),
-    )
 
 
 class FreezerInventorySensor(SensorEntity):
     """Sensor that mirrors a todo list as freezer inventory."""
 
     _attr_icon = "mdi:fridge"
+    _attr_has_entity_name = True
+    _attr_name = None
 
     def __init__(self, hass: HomeAssistant, todo_entity_id: str) -> None:
         self._todo_entity_id = todo_entity_id
         self._items: list[dict] = []
         self.hass = hass
-        self._attr_name = "Freezer Inventory"
         self._attr_unique_id = f"freezer_inventory_{todo_entity_id}"
+        self._attr_name = "Freezer Inventory"
 
     async def async_added_to_hass(self) -> None:
         """Register event listeners once added to hass."""
@@ -113,8 +68,6 @@ class FreezerInventorySensor(SensorEntity):
             async_track_time_interval(self.hass, self._handle_time_interval, SCAN_INTERVAL)
         )
 
-        # If HA is already running (e.g. after a reload), do an immediate fetch
-        # because EVENT_HOMEASSISTANT_START won't fire again
         if self.hass.is_running:
             self.hass.async_create_task(self._async_refresh())
 
@@ -166,7 +119,6 @@ class FreezerInventorySensor(SensorEntity):
                 }
             )
 
-        # Sort by expiration (None last), then by portions ascending
         parsed.sort(key=lambda x: (x["expiration"] is None, x["expiration"] or "", x["portions"]))
         self._items = parsed
         self.async_write_ha_state()

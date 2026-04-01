@@ -2,9 +2,10 @@
   "domain": "freezer_inventory",
   "name": "Freezer Inventory",
   "codeowners": [],
-  "config_flow": false,
+  "config_flow": true,
   "dependencies": ["todo"],
-  "documentation": "",
+  "documentation": "https://github.com/gebirgsbaerbel/home-assistant-freezer-inventory",
+  "integration_type": "service",
   "iot_class": "local_polling",
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

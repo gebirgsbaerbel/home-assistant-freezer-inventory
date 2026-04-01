@@ -1,0 +1,16 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Freezer Inventory",
+        "description": "Select the todo list that contains your freezer inventory. Items need a numeric description (portion count) and optionally a due date (expiration date).",
+        "data": {
+          "todo_entity_id": "Todo list"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This todo list is already configured as a freezer inventory."
+    }
+  }
+}
