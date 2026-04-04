@@ -143,12 +143,11 @@ class FreezerInventoryCard extends HTMLElement {
           align-items: center;
           background: ${rowBg};
           border-radius: 32px;
-          padding: 0px 10px;
+          padding: 9px 10px;
           cursor: pointer;
           user-select: none;
           transition: opacity 0.15s, transform 0.1s;
           -webkit-tap-highlight-color: transparent;
-          min-height: 70px;
           backdrop-filter: blur(3px);
           -webkit-backdrop-filter: blur(3px);
         }
@@ -429,12 +428,11 @@ class ShoppingListCard extends HTMLElement {
           align-items: center;
           background: ${rowBg};
           border-radius: 32px;
-          padding: 12px 16px;
+          padding: 9px 16px;
           cursor: pointer;
           user-select: none;
           transition: opacity 0.15s, transform 0.1s;
           -webkit-tap-highlight-color: transparent;
-          min-height: 70px;
           backdrop-filter: blur(3px);
           -webkit-backdrop-filter: blur(3px);
         }
@@ -503,7 +501,6 @@ class ShoppingListCard extends HTMLElement {
               <div class="row" data-i="${i}">
                 <div class="item-text">
                   <div class="item-name">${this._escapeHtml(item.description)}</div>
-                  ${item.detail ? `<div class="item-detail">${this._escapeHtml(item.detail)}</div>` : ''}
                 </div>
                 <button class="check-btn" data-check="${i}" aria-label="Mark done">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
