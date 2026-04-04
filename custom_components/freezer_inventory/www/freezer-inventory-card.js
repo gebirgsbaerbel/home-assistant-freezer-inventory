@@ -148,7 +148,9 @@ class FreezerInventoryCard extends HTMLElement {
           user-select: none;
           transition: opacity 0.15s, transform 0.1s;
           -webkit-tap-highlight-color: transparent;
-          min-height: 58px;
+          min-height: 70px;
+          backdrop-filter: blur(3px);
+          -webkit-backdrop-filter: blur(3px);
         }
         .row:hover { opacity: 0.8; }
         .row:active { transform: scale(0.98); }
@@ -426,12 +428,15 @@ class ShoppingListCard extends HTMLElement {
           display: flex;
           align-items: center;
           background: ${rowBg};
-          border-radius: 12px;
+          border-radius: 32px;
           padding: 12px 16px;
           cursor: pointer;
           user-select: none;
           transition: opacity 0.15s, transform 0.1s;
           -webkit-tap-highlight-color: transparent;
+          min-height: 70px;
+          backdrop-filter: blur(3px);
+          -webkit-backdrop-filter: blur(3px);
         }
         .row:hover { opacity: 0.8; }
         .row:active { transform: scale(0.98); }
