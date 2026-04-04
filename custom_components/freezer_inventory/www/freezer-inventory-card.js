@@ -595,12 +595,13 @@ window.customCards ??= [];
 window.customCards.push(
   {
     type: 'freezer-inventory-card',
-    name: 'Freezer Inventory',
-    description: 'Shows freezer items with expiration dates and portion counts',
+    name: 'Inventory Card',
+    description: 'Shows inventory items with portion counts and expiration dates',
   },
   {
     type: 'shopping-list-card',
-    name: 'Shopping List',
+    name: 'Shopping List Card',
     description: 'Shows shopping list items with optional details',
   }
 );
+
